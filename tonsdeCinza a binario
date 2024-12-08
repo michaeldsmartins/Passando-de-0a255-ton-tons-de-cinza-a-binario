@@ -1,0 +1,59 @@
+from sklearn import datasets
+import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
+
+# Carregar uma imagem de exemplo (carro) do sklearn
+car_image = datasets.load_sample_image("china.jpg")  # Exemplo de imagem do sklearn
+
+# Converter a imagem carregada para um formato PIL (de NumPy para Image)
+imagem = Image.fromarray(car_image)
+
+# Função para converter para cinza (escala de cinza 0-255)
+def converter_para_cinza(imagem):
+    largura, altura = imagem.size
+    imagem_cinza = Image.new("L", (largura, altura))  # Criar nova imagem em escala de cinza
+    
+    for y in range(altura):
+        for x in range(largura):
+            r, g, b = imagem.getpixel((x, y))  # Pega o valor RGB do pixel
+            # Fórmula de conversão para níveis de cinza (0.299*R + 0.587*G + 0.114*B)
+            cinza = int(0.299 * r + 0.587 * g + 0.114 * b)
+            # Garantir que o valor do cinza fique no intervalo correto de 0-255
+            cinza = max(0, min(255, cinza))
+            imagem_cinza.putpixel((x, y), cinza)  # Coloca o valor do pixel convertido
+
+    return imagem_cinza
+
+# Função para binarizar a imagem
+def binarizar_imagem(imagem_cinza, limiar=128):
+    largura, altura = imagem_cinza.size
+    imagem_binarizada = Image.new("1", (largura, altura))  # Nova imagem binarizada
+
+    for y in range(altura):
+        for x in range(largura):
+            cinza = imagem_cinza.getpixel((x, y))  # Pega o valor de cinza do pixel
+            if cinza >= limiar:
+                imagem_binarizada.putpixel((x, y), 255)  # Branco
+            else:
+                imagem_binarizada.putpixel((x, y), 0)  # Preto
+
+    return imagem_binarizada
+
+# Função para exibir as imagens no Colab
+def exibir_imagem(imagem, titulo="Imagem"):
+    plt.imshow(imagem, cmap='gray')  # Usando o cmap para garantir que a imagem seja mostrada em tons de cinza
+    plt.title(titulo)
+    plt.axis("off")  # Oculta os eixos
+    plt.show()
+
+# Converter para tons de cinza
+imagem_cinza = converter_para_cinza(imagem)
+
+# Binarizar a imagem
+imagem_binarizada = binarizar_imagem(imagem_cinza)
+
+# Exibir as imagens
+exibir_imagem(imagem, "Imagem Original (Carro)")
+exibir_imagem(imagem_cinza, "Imagem em Tons de Cinza")
+exibir_imagem(imagem_binarizada, "Imagem Binarizada")
